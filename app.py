@@ -47,7 +47,10 @@ def get_users():
         return rsp
 
 
-# /users/<userid> GET
+# /users/<userid> 
+"""these methods could be separated into three functions.
+   for future use, we need to check form input from user (whether each var is null, selected attributes input)
+"""
 @app.route('/users/<userid>', methods=['GET', 'PUT', 'DELETE'])
 def get_user_by_id(userid):
     if request.method == 'GET':
@@ -92,12 +95,6 @@ def get_addresses():
         res = UserAddrResource.create(create_data)
         rsp = Response(json.dumps(res, default=str), status=200, content_type="application/json")
         return rsp
-
-# @app.route('/<db_schema>/<table_name>/<column_name>/<prefix>')
-# def get_by_prefix(db_schema, table_name, column_name, prefix):
-#     res = RDBService.get_by_prefix(db_schema, table_name, column_name, prefix)
-#     rsp = Response(json.dumps(res, default=str), status=200, content_type="application/json")
-#     return rsp
 
 
 if __name__ == '__main__':
