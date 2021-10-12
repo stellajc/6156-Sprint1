@@ -1,5 +1,5 @@
 from application_services.BaseApplicationResource import BaseRDBApplicationResource
-import database_services.RDBService as RDBService
+from database_services.RDBService import RDBService as RDBService
 
 # data schema: UserInfo
 # table_name: Users
@@ -14,5 +14,5 @@ class UserResource(BaseRDBApplicationResource):
 
     @classmethod
     def find_by_template(cls, template):
-        res = RDBService.find_by_template("UserInfo", "Users", template)
+        res = RDBService.find_by_template("UserInfo", "User", template)
         return res
