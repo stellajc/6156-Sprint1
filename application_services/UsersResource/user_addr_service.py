@@ -23,6 +23,11 @@ class UserAddrResource(RDBService):
         res = RDBService.find_by_template("UserInfo", "Address", template)
         return res
 
+    @classmethod
+    def create(cls, create_data):
+        res = RDBService.create("UserInfo", "Address", create_data)
+        return res
+
     # @classmethod
     # def get_user_and_address(cls, template):
 
