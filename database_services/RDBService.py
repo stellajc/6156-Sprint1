@@ -74,12 +74,12 @@ class RDBService:
             clause = ""
             args = None
         else:
+
             for k,v in template.items():
                 terms.append(k + "=%s")
                 args.append(v)
 
             clause = " where " +  " AND ".join(terms)
-
 
         return clause, args
 
