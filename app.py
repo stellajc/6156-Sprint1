@@ -14,7 +14,7 @@ logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
 application = Flask(__name__)
-CORS(app)
+CORS(application)
 
 
 @application.route('/')
