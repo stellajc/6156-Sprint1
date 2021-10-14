@@ -24,10 +24,10 @@ class UserResource(BaseRDBApplicationResource):
 
     @classmethod
     def update(cls, select_data, update_data):
-        res = RDBService.update("UserInfo", "Usersgi", select_data, update_data)
+        res = RDBService.update("UserInfo", "Users", select_data, update_data)
         return res
 
     @classmethod
     def delete(cls, template):
-        res = RDBService.delete("UserInfo", "User", template)
+        res = RDBService.delete("UserInfo", "Users", template)
         return res
