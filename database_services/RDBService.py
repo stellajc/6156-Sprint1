@@ -117,5 +117,32 @@ class RDBService:
         sql_stmt = "insert into " + db_schema + "." + table_name + " " + cols_clause + \
             " " + vals_clause
 
-        res = RDBService._run_sql(sql_stmt, args)
+        res = RDBService.run_sql(sql_stmt, args)
+        return res
+
+    @classmethod
+    def update(cls, db_schema, table_name, select_data, update_data):
+
+        select_clause, select_args = RDBService._get_where_clause_args(select_data)
+
+        cols = []
+        args = []
+
+        for k, v in update_data.items():
+            cols.append(k + "=%s")
+            args.append(v)
+        clause = "set " + ", ".join(cols)
+        args = args + select_args
+
+        sql_stmt = "update " + db_schema + "." + table_name + " " + clause + \
+                   " " + select_clause
+
+        res = RDBService.run_sql(sql_stmt, args)
+        return res
+
+    @classmethod
+    def delete(cls, db_schema, table_name, template):
+        clause, args = RDBService._get_where_clause_args(template)
+        sql_stmt = "delete from " + db_schema + "." + table_name + " " + clause
+        res = RDBService.run_sql(sql_stmt, args)
         return res

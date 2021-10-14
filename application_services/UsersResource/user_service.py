@@ -16,3 +16,18 @@ class UserResource(BaseRDBApplicationResource):
     def find_by_template(cls, template):
         res = RDBService.find_by_template("UserInfo", "User", template)
         return res
+
+    @classmethod
+    def create(cls, create_data):
+        res = RDBService.create("UserInfo", "User", create_data)
+        return res
+
+    @classmethod
+    def update(cls, select_data, update_data):
+        res = RDBService.update("UserInfo", "User", select_data, update_data)
+        return res
+
+    @classmethod
+    def delete(cls, template):
+        res = RDBService.delete("UserInfo", "User", template)
+        return res
