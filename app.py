@@ -96,6 +96,3 @@ def get_addresses():
         rsp = Response(json.dumps(res, default=str), status=200, content_type="application/json")
         return rsp
 
-
-if __name__ == '__main__':
-    application.run(host="0.0.0.0", port=5000)
