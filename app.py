@@ -13,11 +13,11 @@ logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
-app = Flask(__name__)
+application = Flask(__name__)
 CORS(app)
 
 
-@app.route('/')
+@application.route('/')
 def hello_world():
     return '<u>Hello World!</u>'
 
@@ -29,7 +29,7 @@ def hello_world():
 #     return rsp
 
 # /users GET
-@app.route('/users', methods=['GET', 'POST'])
+@application.route('/users', methods=['GET', 'POST'])
 def get_users():
     if request.method == 'GET':
         res = UserResource.find_by_template(None)
@@ -51,7 +51,7 @@ def get_users():
 """these methods could be separated into three functions.
    for future use, we need to check form input from user (whether each var is null, selected attributes input)
 """
-@app.route('/users/<userid>', methods=['GET', 'PUT', 'DELETE'])
+@application.route('/users/<userid>', methods=['GET', 'PUT', 'DELETE'])
 def get_user_by_id(userid):
     if request.method == 'GET':
         template = {"id":userid}
@@ -75,7 +75,7 @@ def get_user_by_id(userid):
         return rsp
 
 
-@app.route('/addresses', methods=['GET', 'POST'])
+@application.route('/addresses', methods=['GET', 'POST'])
 def get_addresses():
     if request.method == 'GET':
         res = UserAddrResource.find_by_template(None)
@@ -98,4 +98,4 @@ def get_addresses():
 
 
 if __name__ == '__main__':
-    app.run(host="0.0.0.0", port=5000)
+    application.run(host="0.0.0.0", port=5000)
