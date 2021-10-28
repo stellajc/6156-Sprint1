@@ -13,8 +13,8 @@ class UserResource(BaseRDBApplicationResource):
         pass
 
     @classmethod
-    def find_by_template(cls, template):
-        res = RDBService.find_by_template("UserInfo", "Users", template)
+    def find_by_template(cls, template, limit, offset):
+        res = RDBService.find_by_template("UserInfo", "Users", template, limit, offset)
         return res
 
     @classmethod
