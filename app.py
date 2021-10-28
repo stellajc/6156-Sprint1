@@ -2,6 +2,7 @@ from flask import Flask, Response, request
 from flask_cors import CORS
 import json
 import logging
+import re
 
 from application_services.UsersResource.user_addr_service import UserAddrResource
 from application_services.UsersResource.user_service import UserResource
@@ -17,6 +18,23 @@ logger.setLevel(logging.INFO)
 OFFSET = 0
 MAXLIMIT = 20
 
+# help function for pagination
+def handle_links(url, offset, limit):
+    if "?" not in url:
+        url += "?offset=" +str(offset)+"&limit=" +str(limit)
+    else:
+        if "offset" not in url:
+            url = url + "&offset=" +str(offset)
+        if "limit" not in url:
+            url = url +"&limit=" +str(limit)
+    links = []
+    nexturl = re.sub("offset=\d+","offset="+str(offset+limit), url)
+    prevurl = re.sub("offset=\d+","offset="+str(max(0,offset-limit)), url)
+    links.append({"rel":"self","href":url})
+    links.append({"rel":"next","href":nexturl})
+    links.append({"rel":"prev","href":prevurl})
+    return links
+    
 app = Flask(__name__)
 CORS(app)
 
@@ -40,7 +58,9 @@ def get_users():
         limit = int(request.args.get("limit", MAXLIMIT))
         if limit > MAXLIMIT:
             limit = MAXLIMIT
-        res = UserResource.find_by_template(None, limit, offset)
+        data = UserResource.find_by_template(None, limit, offset)
+        links = handle_links(request.url, offset, limit)
+        res ={"data":data,"links":links}
         rsp = Response(json.dumps(res, default=str), status=200, content_type="application/json")
         return rsp
     elif request.method == 'POST':
@@ -90,7 +110,9 @@ def get_addresses():
         limit = int(request.args.get("limit", MAXLIMIT))
         if limit > MAXLIMIT:
             limit = MAXLIMIT
-        res = UserAddrResource.find_by_template(None, limit, offset)
+        data = UserAddrResource.find_by_template(None, limit, offset)
+        links = handle_links(request.url, offset, limit)
+        res ={"data":data,"links":links}
         rsp = Response(json.dumps(res, default=str), status=200, content_type="application/json")
         return rsp
     elif request.method == 'POST':
