@@ -96,6 +96,22 @@ def get_addresses():
         rsp = Response(json.dumps(res, default=str), status=200, content_type="application/json")
         return rsp
 
+@app.route('/users/<userid>/address', methods=['GET'])
+def get_address_from_userid(userid):
+    if request.method == 'GET':
+        template = {"id": userid}
+        res = UserAddrResource.find_linked_data("id", template)
+        rsp = Response(json.dumps(res, default=str), status=200, content_type="application/json")
+        return rsp
+
+
+@app.route('/address/<addressid>/users', methods=['GET'])
+def get_user_from_addressid(addressid):
+    if request.method == 'GET':
+        template = {"id": addressid}
+        res = UserResource.find_linked_data("addressID", template)
+        rsp = Response(json.dumps(res, default=str), status=200, content_type="application/json")
+        return rsp
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0", port=5000)

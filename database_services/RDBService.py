@@ -100,6 +100,22 @@ class RDBService:
         return res
 
     @classmethod
+    def find_linked_data(cls, db_schema, table1_name, table2_name, target, template):
+        wc, args = RDBService._get_where_clause_args(template)
+        key = list(template.keys())[0]
+
+        conn = RDBService._get_db_connection()
+        cur = conn.cursor()
+
+        sql = "select * from " + db_schema + "." + table1_name + " where " + target + "=(select " + key + " from "\
+              + db_schema + "." + table2_name + wc + ")"
+        res = cur.execute(sql, args)
+        res = cur.fetchall()
+
+        conn.close()
+        return res
+
+    @classmethod
     def create(cls, db_schema, table_name, create_data):
 
         cols = []
