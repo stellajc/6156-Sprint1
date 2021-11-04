@@ -29,8 +29,8 @@ class UserAddrResource(RDBService):
         return res
 
     @classmethod
-    def find_linked_data(cls, target, template):
-        res = RDBService.find_linked_data("UserInfo", "Address", "User", target, template)
+    def find_linked_data(cls, target, template, key):
+        res = RDBService.find_linked_data("UserInfo", "Address", "User", target, template, key)
         return res
 
     # @classmethod

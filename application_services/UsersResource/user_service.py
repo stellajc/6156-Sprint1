@@ -33,6 +33,6 @@ class UserResource(BaseRDBApplicationResource):
         return res
 
     @classmethod
-    def find_linked_data(cls, target, template):
-        res = RDBService.find_linked_data("UserInfo", "User", "Address", target, template)
+    def find_linked_data(cls, target, template, key):
+        res = RDBService.find_linked_data("UserInfo", "User", "Address", target, template, key)
         return res
