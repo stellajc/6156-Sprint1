@@ -31,3 +31,8 @@ class UserResource(BaseRDBApplicationResource):
     def delete(cls, template):
         res = RDBService.delete("UserInfo", "User", template)
         return res
+
+    @classmethod
+    def find_linked_data(cls, target, template):
+        res = RDBService.find_linked_data("UserInfo", "User", "Address", target, template)
+        return res

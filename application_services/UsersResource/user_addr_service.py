@@ -28,6 +28,11 @@ class UserAddrResource(RDBService):
         res = RDBService.create("UserInfo", "Address", create_data)
         return res
 
+    @classmethod
+    def find_linked_data(cls, target, template):
+        res = RDBService.find_linked_data("UserInfo", "Address", "User", target, template)
+        return res
+
     # @classmethod
     # def get_user_and_address(cls, template):
 
