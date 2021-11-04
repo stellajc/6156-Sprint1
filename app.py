@@ -1,4 +1,4 @@
-from flask import Flask, Response, request
+from flask import Flask, Response, request, redirect, url_for
 from flask_cors import CORS
 import json
 import logging
@@ -7,7 +7,9 @@ import re
 from application_services.UsersResource.user_addr_service import UserAddrResource
 from application_services.UsersResource.user_service import UserResource
 
-from database_services.RDBService import RDBService as RDBService
+# from flask_dance.contrib.google import make_google_blueprint, google
+# import middleware.simple_security as simple_security
+from middleware.notification import NotificationMiddlewareHandler as NotificationMiddlewareHandler
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -18,25 +20,36 @@ logger.setLevel(logging.INFO)
 OFFSET = 0
 MAXLIMIT = 20
 
+app = Flask(__name__)
+CORS(app)
+
+# oauth
+# app.secret_key = "supersekrit"
+# blueprint = make_google_blueprint(
+#     client_id="my-key-here",
+#     client_secret="my-secret-here",
+#     scope=["profile", "email"]
+# )
+# app.register_blueprint(blueprint, url_prefix="/login")
+
+g_bp = app.blueprints.get("google")
+
 # help function for pagination
 def handle_links(url, offset, limit):
     if "?" not in url:
-        url += "?offset=" +str(offset)+"&limit=" +str(limit)
+        url += "?offset=" + str(offset) + "&limit=" + str(limit)
     else:
         if "offset" not in url:
-            url = url + "&offset=" +str(offset)
+            url = url + "&offset=" + str(offset)
         if "limit" not in url:
-            url = url +"&limit=" +str(limit)
+            url = url + "&limit=" + str(limit)
     links = []
-    nexturl = re.sub("offset=\d+","offset="+str(offset+limit), url)
-    prevurl = re.sub("offset=\d+","offset="+str(max(0,offset-limit)), url)
-    links.append({"rel":"self","href":url})
-    links.append({"rel":"next","href":nexturl})
-    links.append({"rel":"prev","href":prevurl})
+    nexturl = re.sub("offset=\d+", "offset=" + str(offset + limit), url)
+    prevurl = re.sub("offset=\d+", "offset=" + str(max(0, offset - limit)), url)
+    links.append({"rel": "self", "href": url})
+    links.append({"rel": "next", "href": nexturl})
+    links.append({"rel": "prev", "href": prevurl})
     return links
-    
-app = Flask(__name__)
-CORS(app)
 
 
 @app.route('/')
@@ -75,7 +88,7 @@ def get_users():
         return rsp
 
 
-# /users/<userid> 
+# /users/<userid>
 """these methods could be separated into three functions.
    for future use, we need to check form input from user (whether each var is null, selected attributes input)
 """
@@ -129,6 +142,21 @@ def get_addresses():
         res = UserAddrResource.create(create_data)
         rsp = Response(json.dumps(res, default=str), status=200, content_type="application/json")
         return rsp
+
+# @app.before_request
+# def before_request_func():
+#     print("before_request is running")
+#     result_ok = simple_security.check_security(request, google, g_bp)
+#
+#     if not result_ok:
+#         return redirect(url_for("google.login"))
+
+
+@app.after_request
+def after_request_func(response):
+    NotificationMiddlewareHandler.notify(request, response)
+    return response
+
 
 
 if __name__ == '__main__':
