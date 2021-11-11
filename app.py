@@ -56,6 +56,24 @@ def handle_links(url, offset, limit):
 def hello_world():
     return '<u>Hello World!</u>'
 
+@app.route("/index", methods=["GET"])
+def get_user_field():
+    if request.method == 'GET':
+        # /index?id=1&nameLast=Potter&nameFirst=Harry&fields=email,addressID
+        id = request.args.get("id")
+        nameLast = request.args.get("nameLast")
+        nameFirst = request.args.get("nameFirst")
+        fields = request.args.get("fields")
+        template = {}
+        if id:
+            template['id'] = id
+        if nameLast:
+            template['nameLast'] = nameLast
+        if nameFirst:
+            template['nameFirst'] = nameFirst
+        res = UserResource.find_by_template_fields(fields,template)
+        resp = Response(json.dumps(res, default=str), status=200, content_type="application/json")
+        return resp
 
 # @app.route('/imdb/artists/<prefix>')
 # def get_artists_by_prefix(prefix):
