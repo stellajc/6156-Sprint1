@@ -100,6 +100,25 @@ class RDBService:
         conn.close()
 
         return res
+    
+    @classmethod
+    def find_by_template_fields(cls, db_schema, table_name, fields,template):
+
+        wc, args = RDBService._get_where_clause_args(template)
+        conn = RDBService._get_db_connection()
+        cur = conn.cursor()
+        if fields:
+            sql = "select " + fields +" from " + db_schema + "." + table_name + wc
+        else:
+            sql = "select * from " + db_schema + "." + table_name + wc
+        print(sql)
+        # sql = "select * from " + db_schema + "." + table_name + " where "+  " + wc
+        res = cur.execute(sql, args=args)
+        # res = cur.execute(sql)
+        res = cur.fetchall()
+        conn.close()
+
+        return res
 
     @classmethod
     def find_linked_data(cls, db_schema, table1_name, table2_name, target, template):
