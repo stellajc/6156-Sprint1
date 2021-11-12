@@ -1,8 +1,10 @@
 from flask import Flask, Response, request, redirect, url_for
+from flask import Flask, Response, request, redirect, url_for
 from flask_dance.contrib.google import make_google_blueprint, google
 from flask_cors import CORS
 import json
 import logging
+import re
 import os
 
 from application_services.UsersResource.user_addr_service import UserAddrResource
@@ -10,6 +12,10 @@ from application_services.UsersResource.user_service import UserResource
 from application_services.AppHTTPStatus import AppHTTPStatus
 # from application_services.smarty_address_service import SmartyAddressService
 from database_services.RDBService import RDBService as RDBService
+
+# from flask_dance.contrib.google import make_google_blueprint, google
+# import middleware.simple_security as simple_security
+from middleware.notification import NotificationMiddlewareHandler as NotificationMiddlewareHandler
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -58,6 +64,35 @@ def messy_error(e):
                    content_type="plain/json")
     return rsp
 
+# <<<<<<< new line below <<<<<<
+# oauth
+# app.secret_key = "supersekrit"
+# blueprint = make_google_blueprint(
+#     client_id="my-key-here",
+#     client_secret="my-secret-here",
+#     scope=["profile", "email"]
+# )
+# app.register_blueprint(blueprint, url_prefix="/login")
+
+g_bp = app.blueprints.get("google")
+
+# help function for pagination
+def handle_links(url, offset, limit):
+    if "?" not in url:
+        url += "?offset=" + str(offset) + "&limit=" + str(limit)
+    else:
+        if "offset" not in url:
+            url = url + "&offset=" + str(offset)
+        if "limit" not in url:
+            url = url + "&limit=" + str(limit)
+    links = []
+    nexturl = re.sub("offset=\d+", "offset=" + str(offset + limit), url)
+    prevurl = re.sub("offset=\d+", "offset=" + str(max(0, offset - limit)), url)
+    links.append({"rel": "self", "href": url})
+    links.append({"rel": "next", "href": nexturl})
+    links.append({"rel": "prev", "href": prevurl})
+    return links
+# >>>>>>> new line above >>>>
 
 @app.route('/')
 def hello_world():
@@ -84,6 +119,12 @@ def get_users():
                 query_parms[i] = request.args.get(i)
         res, exception_res = UserResource.find_by_template(query_parms, limit, offset)
         rsp = AppHTTPStatus().format_rsp(res, exception_res, method=request.method, path=request.path)
+        # >>>>>>>> new line below >>>>
+        data = UserResource.find_by_template(None, limit, offset)
+        links = handle_links(request.url, offset, limit)
+        res ={"data":data,"links":links}
+        rsp = Response(json.dumps(res, default=str), status=200, content_type="application/json")
+        # <<<<<<<< new line above <<<<
         return rsp
     elif request.method == 'POST':
         # id = request.form['id']
@@ -102,7 +143,7 @@ def get_users():
         return rsp
 
 
-# /users/<userid> 
+# /users/<userid>
 """these methods could be separated into three functions.
    for future use, we need to check form input from user (whether each var is null, selected attributes input)
 """
@@ -144,6 +185,12 @@ def get_addresses():
                 query_parms[i] = request.args.get(i)
         res, exception_res = UserAddrResource.find_by_template(query_parms, limit, offset)
         rsp = AppHTTPStatus().format_rsp(res, exception_res, method=request.method, path=request.path)
+        # <<<<<< new line below
+        data = UserAddrResource.find_by_template(None, limit, offset)
+        links = handle_links(request.url, offset, limit)
+        res ={"data":data,"links":links}
+        rsp = Response(json.dumps(res, default=str), status=200, content_type="application/json")
+        # >>>>> new line above >>>>
         return rsp
     elif request.method == 'POST':
         # id = request.form['id']
@@ -164,6 +211,7 @@ def get_addresses():
         res, exception_res = UserAddrResource.create(create_data)
         rsp = AppHTTPStatus().format_rsp(res, exception_res, method=request.method, path=request.path)
         return rsp
+
 
 @app.route('/users/<userid>/address', methods=['GET'])
 def get_address_from_userid(userid):
@@ -194,6 +242,23 @@ def get_user_from_addressid(addressid):
 #         return Response(json.dumps({}), status=200, content_type="application/json")
 #     else:
 #         return Response(json.dumps({}), status=200, content_type="application/json")
+
+# <<<<<< new line below
+# @app.before_request
+# def before_request_func():
+#     print("before_request is running")
+#     result_ok = simple_security.check_security(request, google, g_bp)
+#
+#     if not result_ok:
+#         return redirect(url_for("google.login"))
+
+
+@app.after_request
+def after_request_func(response):
+    NotificationMiddlewareHandler.notify(request, response)
+    return response
+
+# <<<<<<<< new line above <<<<<
 
 
 if __name__ == '__main__':
