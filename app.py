@@ -1,12 +1,18 @@
-from flask import Flask, Response, request
+from flask import Flask, Response, request, redirect, url_for
 from flask_cors import CORS
 import json
 import logging
+import os
+from flask_dance.contrib.google import make_google_blueprint, google
+from oauthlib.oauth2.rfc6749.errors import TokenExpiredError
+
 
 from application_services.UsersResource.user_addr_service import UserAddrResource
 from application_services.UsersResource.user_service import UserResource
 
 from database_services.RDBService import RDBService as RDBService
+
+import middleware.security as security
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -16,9 +22,41 @@ logger.setLevel(logging.INFO)
 app = Flask(__name__)
 CORS(app)
 
+app.secret_key = "some secret"
+client_id = "79382664809-0a3bcn4hokdmgr9tcapsriguql3lfnnm.apps.googleusercontent.com"
+client_secret = "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"
+
+os.environ['OAUTHLIB_RELAX_TOKEN_SCOPE'] = '1'
+os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
+
+blueprint = make_google_blueprint(
+    client_id=client_id,
+    client_secret=client_secret,
+    reprompt_consent=True,
+    scope=["profile", "email"]
+)
+app.register_blueprint(blueprint, url_prefix="/login", offline=True)
+
+
+@app.before_request
+def before_request_func():
+    try:
+        result_ok = security.check_security(request, google)
+        if (not result_ok) and request.endpoint != 'google.login':
+            return redirect(url_for('google.login'))
+    except TokenExpiredError:
+        del blueprint.token
+        return redirect(url_for('google.login'))
+
 
 @app.route('/')
 def hello_world():
+    # if not google.authorized:
+    #     return redirect(url_for("google.login"))
+    # resp = google.get("/oauth2/v1/userinfo")
+    # assert resp.ok, resp.text
+    # print(resp.json())
+    # return "You are {email} on Google".format(email=resp.json()["email"])
     return '<u>Hello World!</u>'
 
 
