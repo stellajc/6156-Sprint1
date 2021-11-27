@@ -19,13 +19,18 @@ class UserAddrResource(RDBService):
 
 
     @classmethod
-    def find_by_template(cls, template):
-        res = RDBService.find_by_template("UserInfo", "Address", template)
+    def find_by_template(cls, template, limit, offset):
+        res = RDBService.find_by_template("UserInfo", "Address", template, limit, offset)
         return res
 
     @classmethod
     def create(cls, create_data):
         res = RDBService.create("UserInfo", "Address", create_data)
+        return res
+
+    @classmethod
+    def find_linked_data(cls, target, template):
+        res = RDBService.find_linked_data("UserInfo", "Address", "User", target, template)
         return res
 
     # @classmethod

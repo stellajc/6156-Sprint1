@@ -13,8 +13,8 @@ class UserResource(BaseRDBApplicationResource):
         pass
 
     @classmethod
-    def find_by_template(cls, template):
-        res = RDBService.find_by_template("UserInfo", "User", template)
+    def find_by_template(cls, template, limit, offset):
+        res = RDBService.find_by_template("UserInfo", "User", template, limit, offset)
         return res
 
     @classmethod
@@ -30,4 +30,9 @@ class UserResource(BaseRDBApplicationResource):
     @classmethod
     def delete(cls, template):
         res = RDBService.delete("UserInfo", "User", template)
+        return res
+
+    @classmethod
+    def find_linked_data(cls, target, template):
+        res = RDBService.find_linked_data("UserInfo", "User", "Address", target, template)
         return res
