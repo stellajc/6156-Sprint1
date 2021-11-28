@@ -22,12 +22,24 @@ def get_db_info():
             "cursorclass": pymysql.cursors.DictCursor
         }
     else:
+        # db_info = {
+        #     "host": "sprint-hw1.c9u6tpsdswam.us-east-2.rds.amazonaws.com",
+        #     "user": "teamnamenotfound",
+        #     "password": "teamnamenotfound6156",
+        #     "cursorclass": pymysql.cursors.DictCursor
+        # }
         db_info = {
-            "host": "sprint-hw1.c9u6tpsdswam.us-east-2.rds.amazonaws.com",
-            "user": "teamnamenotfound",
-            "password": "teamnamenotfound6156",
+            "host": "localhost",
+            "user": "dbuser",
+            "password": "dbuserdbuser",
             "cursorclass": pymysql.cursors.DictCursor
         }
 
     return db_info
+
+def get_context(api_name):
+    if api_name == "SMARTY":
+        auth_id = "55db43b6-6c8d-8af6-c1de-302bf949bc48"
+        auth_token = "8zIBqRgihSDMg4fdjdW2"
+        return {"auth_id":auth_id, "auth_token":auth_token}
 

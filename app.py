@@ -1,5 +1,6 @@
-from flask import Flask, Response, request, redirect, url_for
-from flask import Flask, Response, request, redirect, url_for
+import time
+
+from flask import Flask, Response, request, redirect, url_for, session
 from flask_dance.contrib.google import make_google_blueprint, google
 from flask_cors import CORS
 import json
@@ -16,6 +17,7 @@ from database_services.RDBService import RDBService as RDBService
 # from flask_dance.contrib.google import make_google_blueprint, google
 # import middleware.simple_security as simple_security
 from middleware.notification import NotificationMiddlewareHandler as NotificationMiddlewareHandler
+from middleware.steamsignin import SteamSignIn
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -28,32 +30,12 @@ MAXLIMIT = 20
 
 app = Flask(__name__)
 CORS(app)
-
 app.secret_key = "supersekrit"
-blueprint = make_google_blueprint(
-    client_id=os.environ["OAUTH_CLIENT_ID"],
-    client_secret=os.environ["OAUTH_CLIENT_SECRET"],
-    offline=True,
-    scope=["profile", "email"]
-)
-app.register_blueprint(blueprint, url_prefix="/login")
-os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = '1'
-os.environ["OAUTHLIB_RELAX_TOKEN_SCOPE"] = '1'
-
-@app.before_request
-def googleoauth():
-    if not google.authorized:
-        return redirect(url_for("google.login"))
-    try:
-        resp = google.get("oauth2/v2/userinfo")
-        assert resp.ok, resp.text
-    except Exception as e:
-        return redirect(url_for("google.login"))
-
+os.environ['steawmpowered_key'] = '6E81AAFD6DF870E7C4B5761CC5D50F59'
 @app.errorhandler(404)
 def not_found(e):
     rsp = Response(response=json.dumps({"ERROR": "404 NOT FOUND"}, default=str, indent=4), status=404,
-                   content_type="plain/json")
+                   content_type="application/json")
     return rsp
 
 
@@ -61,10 +43,9 @@ def not_found(e):
 def messy_error(e):
     print(e)
     rsp = Response(json.dumps({"ERROR": "500 WEIRD SERVER ERROR"}, default=str, indent=4), status=500,
-                   content_type="plain/json")
+                   content_type="application/json")
     return rsp
 
-# <<<<<<< new line below <<<<<<
 # oauth
 # app.secret_key = "supersekrit"
 # blueprint = make_google_blueprint(
@@ -92,11 +73,17 @@ def handle_links(url, offset, limit):
     links.append({"rel": "next", "href": nexturl})
     links.append({"rel": "prev", "href": prevurl})
     return links
-# >>>>>>> new line above >>>>
 
+num=0
 @app.route('/')
 def hello_world():
-    return '<u>Hello World!</u>'
+    # click_time = time.time()
+    # time.sleep(5)
+    # global num
+    # num += 1
+    # time_n = time.time()
+    # return f'<u>Hello World! window {num}, click_time {click_time}, time {time_n}</u>'
+    return "<u>Hello World!</u>"
 
 # @app.route('/imdb/artists/<prefix>')
 # def get_artists_by_prefix(prefix):
@@ -115,16 +102,21 @@ def get_users():
         query_parms = dict()
         arg_list = [i for i in request.args.keys()]
         for i in arg_list:
-            if i != "offset" and i != "limit":
+            if i.lower() != "offset" and i.lower() != "limit":
                 query_parms[i] = request.args.get(i)
-        res, exception_res = UserResource.find_by_template(query_parms, limit, offset)
-        rsp = AppHTTPStatus().format_rsp(res, exception_res, method=request.method, path=request.path)
-        # >>>>>>>> new line below >>>>
-        data = UserResource.find_by_template(None, limit, offset)
+        data, exception_res = UserResource.find_by_template(query_parms, limit, offset)
         links = handle_links(request.url, offset, limit)
-        res ={"data":data,"links":links}
-        rsp = Response(json.dumps(res, default=str), status=200, content_type="application/json")
-        # <<<<<<<< new line above <<<<
+        if data is not None:
+            res = {"data": data, "links": links}
+        else:
+            res = data
+        rsp = AppHTTPStatus().format_rsp(res, exception_res, method=request.method, path=request.path)
+        # # >>>>>>>> new line below >>>>
+        # data = UserResource.find_by_template(None, limit, offset)
+        # links = handle_links(request.url, offset, limit)
+        # res ={"data":data,"links":links}
+        # rsp = Response(json.dumps(res, default=str), status=200, content_type="application/json")
+        # # <<<<<<<< new line above <<<<
         return rsp
     elif request.method == 'POST':
         # id = request.form['id']
@@ -181,16 +173,21 @@ def get_addresses():
         query_parms = dict()
         arg_list = [i for i in request.args.keys()]
         for i in arg_list:
-            if i != "offset" and i != "limit":
+            if i.lower() != "offset" and i.lower() != "limit":
                 query_parms[i] = request.args.get(i)
-        res, exception_res = UserAddrResource.find_by_template(query_parms, limit, offset)
-        rsp = AppHTTPStatus().format_rsp(res, exception_res, method=request.method, path=request.path)
-        # <<<<<< new line below
-        data = UserAddrResource.find_by_template(None, limit, offset)
+        data, exception_res = UserAddrResource.find_by_template(query_parms, limit, offset)
         links = handle_links(request.url, offset, limit)
-        res ={"data":data,"links":links}
-        rsp = Response(json.dumps(res, default=str), status=200, content_type="application/json")
-        # >>>>> new line above >>>>
+        if data is not None:
+            res = {"data": data, "links": links}
+        else:
+            res = data
+        rsp = AppHTTPStatus().format_rsp(res, exception_res, method=request.method, path=request.path)
+        # # <<<<<< new line below
+        # data = UserAddrResource.find_by_template(None, limit, offset)
+        # links = handle_links(request.url, offset, limit)
+        # res ={"data":data,"links":links}
+        # rsp = Response(json.dumps(res, default=str), status=200, content_type="application/json")
+        # # >>>>> new line above >>>>
         return rsp
     elif request.method == 'POST':
         # id = request.form['id']
@@ -243,7 +240,48 @@ def get_user_from_addressid(addressid):
 #     else:
 #         return Response(json.dumps({}), status=200, content_type="application/json")
 
-# <<<<<< new line below
+
+@app.route('/steampowered/status')
+def steam_status():
+    if session.get('steam_userid', None):
+        print("cookie")
+        print(request.cookies.get("steam_userid", None))
+        return "SteamID is: {0}".format(session['steam_userid'])
+        # return
+    else:
+        # TODO: two buttons, one for retry, one for redirect to '/'
+        steamlogin = SteamSignIn()
+        return steamlogin.RedirectUser(steamlogin.ConstructURL(request.url_root + url_for('steam_login')))
+
+
+@app.route('/steampowered/login')
+def steam_login():
+    returnData = request.values
+    steamlogin = SteamSignIn()
+    steamID = steamlogin.ValidateResults(returnData)
+    if steamID:
+        session['steam_userid'] = steamID
+        print('SteamID is: {0}'.format(steamID))
+    # else:
+    return redirect(url_for('steam_status'))
+
+
+@app.route('/steampowered/logout')
+def steam_logout():
+    session.pop('steam_userid', None)
+    return redirect(url_for('/'))
+
+# auth to fetch game list of the specific user
+@app.route('/steampowered/auth')
+def steam_auth():
+    user = session.get('steam_userid', None)
+    if user:
+        steam_key = os.getenv('steampowered_key')
+        steamapi_base_url = 'https://api.steampowered.com/'
+
+
+
+
 # @app.before_request
 # def before_request_func():
 #     print("before_request is running")
@@ -253,13 +291,11 @@ def get_user_from_addressid(addressid):
 #         return redirect(url_for("google.login"))
 
 
-@app.after_request
-def after_request_func(response):
-    NotificationMiddlewareHandler.notify(request, response)
-    return response
-
-# <<<<<<<< new line above <<<<<
+# @app.after_request
+# def after_request_func(response):
+#     NotificationMiddlewareHandler.notify(request, response)
+#     return response
 
 
 if __name__ == '__main__':
-    app.run(host="0.0.0.0", port=5000)
+    app.run()
