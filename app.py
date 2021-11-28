@@ -1,12 +1,12 @@
 import time
-
 from flask import Flask, Response, request, redirect, url_for, session
-from flask_dance.contrib.google import make_google_blueprint, google
 from flask_cors import CORS
 import json
 import logging
-import re
 import os
+from flask_dance.contrib.google import make_google_blueprint, google
+from oauthlib.oauth2.rfc6749.errors import TokenExpiredError
+import re
 
 from application_services.UsersResource.user_addr_service import UserAddrResource
 from application_services.UsersResource.user_service import UserResource
@@ -18,6 +18,8 @@ from database_services.RDBService import RDBService as RDBService
 # import middleware.simple_security as simple_security
 from middleware.notification import NotificationMiddlewareHandler as NotificationMiddlewareHandler
 from middleware.steamsignin import SteamSignIn
+
+import middleware.security as security
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -46,6 +48,33 @@ def messy_error(e):
                    content_type="application/json")
     return rsp
 
+##### new line below
+app.secret_key = "some secret"
+client_id = "79382664809-0a3bcn4hokdmgr9tcapsriguql3lfnnm.apps.googleusercontent.com"
+client_secret = "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"
+
+os.environ['OAUTHLIB_RELAX_TOKEN_SCOPE'] = '1'
+os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
+
+blueprint = make_google_blueprint(
+    client_id=client_id,
+    client_secret=client_secret,
+    reprompt_consent=True,
+    scope=["profile", "email"]
+)
+app.register_blueprint(blueprint, url_prefix="/login", offline=True)
+##### new line above
+
+@app.before_request
+def before_request_func():
+    try:
+        result_ok = security.check_security(request, google)
+        if (not result_ok) and request.endpoint != 'google.login':
+            return redirect(url_for('google.login'))
+    except TokenExpiredError:
+        del blueprint.token
+        return redirect(url_for('google.login'))
+
 # oauth
 # app.secret_key = "supersekrit"
 # blueprint = make_google_blueprint(
@@ -55,7 +84,7 @@ def messy_error(e):
 # )
 # app.register_blueprint(blueprint, url_prefix="/login")
 
-g_bp = app.blueprints.get("google")
+# g_bp = app.blueprints.get("google")
 
 # help function for pagination
 def handle_links(url, offset, limit):
@@ -74,16 +103,17 @@ def handle_links(url, offset, limit):
     links.append({"rel": "prev", "href": prevurl})
     return links
 
-num=0
+
 @app.route('/')
 def hello_world():
-    # click_time = time.time()
-    # time.sleep(5)
-    # global num
-    # num += 1
-    # time_n = time.time()
-    # return f'<u>Hello World! window {num}, click_time {click_time}, time {time_n}</u>'
-    return "<u>Hello World!</u>"
+    # if not google.authorized:
+    #     return redirect(url_for("google.login"))
+    # resp = google.get("/oauth2/v1/userinfo")
+    # assert resp.ok, resp.text
+    # print(resp.json())
+    # return "You are {email} on Google".format(email=resp.json()["email"])
+    return '<u>Hello World!</u>'
+
 
 # @app.route('/imdb/artists/<prefix>')
 # def get_artists_by_prefix(prefix):
