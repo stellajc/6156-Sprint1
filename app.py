@@ -121,7 +121,7 @@ def get_users():
         address_id = request.form['address_id']
         create_data = {"id": id, "nameLast": name_last, "nameFirst": name_first, "email": email, "addressID": address_id}
         res = UserResource.create(create_data)
-        rsp = Response(json.dumps(res, default=str), status=200, content_type="application/json")
+        rsp = Response(json.dumps(res, default=str), status=201, content_type="application/json")
         return rsp
 
 
@@ -177,7 +177,7 @@ def get_addresses():
         create_data = {"id": id, "streetNo": street_no, "streetName1": street_name1, "streetName2": street_name2,
                        "city": city, "region": region, "countryCode": country_code, "postalCode": postal_code}
         res = UserAddrResource.create(create_data)
-        rsp = Response(json.dumps(res, default=str), status=200, content_type="application/json")
+        rsp = Response(json.dumps(res, default=str), status=201, content_type="application/json")
         return rsp
 
 
