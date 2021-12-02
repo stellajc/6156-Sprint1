@@ -1,6 +1,7 @@
 import json
 import boto3
 import middleware.context as context
+import os
 
 SNSARN = "arn:aws:sns:us-east-1:213660796932:sprint2_6156_1"
 REGION = "us-east-1"
@@ -24,7 +25,11 @@ class NotificationMiddlewareHandler:
     @classmethod
     def get_sns_client(cls):
         if NotificationMiddlewareHandler.sns_client is None:
+            key_id = os.getenv('AWS_ACCESS_KEY_ID')
+            key = os.getenv('AWS_SECRET_ACCESS_KEY')
             NotificationMiddlewareHandler.sns_client = sns = boto3.client("sns",
+                                                                          aws_access_key_id=key_id,
+                                                                          aws_secret_access_key=key,
                                                                           region_name=REGION)
         return NotificationMiddlewareHandler.sns_client
 
@@ -58,8 +63,8 @@ class NotificationMiddlewareHandler:
 
         path = request.path.split("?")[0]
         if not (path == notifydict["path"] and request.method == notifydict["method"]):
-            print(path, request.method)
-            print("No need to notify")
+            # print(path, request.method)
+            # print("No need to notify")
             return
         notification = {}
 
