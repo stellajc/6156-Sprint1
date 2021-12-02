@@ -33,7 +33,7 @@ MAXLIMIT = 20
 app = Flask(__name__)
 CORS(app)
 app.secret_key = "supersekrit"
-os.environ['steawmpowered_key'] = '6E81AAFD6DF870E7C4B5761CC5D50F59'
+os.environ['steawmpowered_key'] = 'BBC837ECFD8415A58B7575D83BCDA639'
 @app.errorhandler(404)
 def not_found(e):
     rsp = Response(response=json.dumps({"ERROR": "404 NOT FOUND"}, default=str, indent=4), status=404,
@@ -49,9 +49,9 @@ def messy_error(e):
     return rsp
 
 ##### new line below
-app.secret_key = "some secret"
-client_id = "79382664809-0a3bcn4hokdmgr9tcapsriguql3lfnnm.apps.googleusercontent.com"
-client_secret = "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"
+# app.secret_key = "some secret"
+client_id = "650452278368-092i2s8rtp2n6kmcpr7m3ngt3afmb40k.apps.googleusercontent.com"
+client_secret = "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"
 
 os.environ['OAUTHLIB_RELAX_TOKEN_SCOPE'] = '1'
 os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
@@ -61,19 +61,20 @@ blueprint = make_google_blueprint(
     client_secret=client_secret,
     reprompt_consent=True,
     scope=["profile", "email"]
+    # redirect_url="http://127.0.0.1:3000/"
 )
 app.register_blueprint(blueprint, url_prefix="/login", offline=True)
 ##### new line above
 
-@app.before_request
-def before_request_func():
-    try:
-        result_ok = security.check_security(request, google)
-        if (not result_ok) and request.endpoint != 'google.login':
-            return redirect(url_for('google.login'))
-    except TokenExpiredError:
-        del blueprint.token
-        return redirect(url_for('google.login'))
+# @app.before_request
+# def before_request_func():
+#     try:
+#         result_ok = security.check_security(request, google)
+#         if (not result_ok) and request.endpoint != 'google.login':
+#             return redirect(url_for('google.login'))
+#     except TokenExpiredError:
+#         del blueprint.token
+#         return redirect(url_for('google.login'))
 
 # oauth
 # app.secret_key = "supersekrit"
@@ -122,7 +123,7 @@ def hello_world():
 #     return rsp
 
 # /users GET
-@app.route('/users', methods=['GET', 'POST'])
+@app.route('/users', methods=['GET', 'POST','OPTIONS'])
 def get_users():
     if request.method == 'GET':
         offset = int(request.args.get("offset", OFFSET))
@@ -163,6 +164,10 @@ def get_users():
         res, exception_res = UserResource.create(create_data)
         rsp = AppHTTPStatus().format_rsp(res, exception_res, method=request.method, path=request.path)
         return rsp
+    else:
+        res = Response()
+        res.headers['Access-Control-Allow-Origin'] = '*'
+        return res
 
 
 # /users/<userid>
@@ -192,6 +197,30 @@ def get_user_by_id(userid):
         rsp = AppHTTPStatus().format_rsp(res, exception_res, method=request.method, path=request.path)
         return rsp
 
+@app.route('/user/register', methods=['POST'])
+def register_new_user():
+    # only json files allowed in the body
+    create_data = json.loads(request.data.decode(encoding='utf-8'))
+    if not create_data.get("accessToken", None):
+        # TODO: prevent unauthorized users needed to be implemented on frontend
+        return Response(json.dumps({"ERROR": "USER NOT AUTHORIZED"}, default=str, indent=4),
+                        status=AppHTTPStatus.post_create, content_type='application/json')
+    create_data = {
+        'nameLast': create_data['family_name'].strip(),
+        'nameFirst': create_data['given_name'].strip(),
+        'email': create_data['email'].strip(),
+        'googleID': create_data['id'].strip(),
+        'accessToken': create_data['accessToken'].strip()
+    }
+    localID, _ = UserResource.find_by_template({'email': create_data['email']}, field_list=['ID'])
+    if localID:  # existing user update token
+        tokenres, token_exc = UserResource.update({'ID': localID}, {'accessToken': create_data['accessToken']})
+        rsp = AppHTTPStatus().format_rsp(localID, None, method='GET', path=request.path)
+    else:
+        res, exception_res = UserResource.create(create_data)
+        localID, _ = UserResource.find_by_template({'email': create_data['email']}, field_list=['ID'])
+        rsp = AppHTTPStatus().format_rsp(localID, exception_res, method='GET', path=request.path)
+    return rsp
 
 @app.route('/addresses', methods=['GET', 'POST'])
 def get_addresses():

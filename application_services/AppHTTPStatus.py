@@ -1,5 +1,6 @@
 from flask import Response
 import json
+from collections import OrderedDict
 
 class AppHTTPStatus(Exception):
     """
@@ -56,6 +57,15 @@ class AppHTTPStatus(Exception):
                 rsp = Response(json.dumps({"location": path}, default=str, indent=4), status=self.post_create,
                                content_type="application/json")
             elif method == 'GET':
+                # if type(rsp_normal) != dict:
+                #     if len(rsp_normal) == 1:
+                #         rsp_normal = rsp_normal[0]
+                #     elif len(rsp_normal) > 1:
+                #         rsp_normal = {'dataCollection': rsp_normal}
+                #     else:
+                #         rsp_normal = None
+                # rsp = Response(json.dumps(rsp_normal, default=str, indent=4, separators=(',', ':')),
+                #                status=self.other_code, content_type="application/json")
                 rsp = Response(json.dumps(rsp_normal, default=str, indent=4),
                                status=self.other_code, content_type="application/json")
             elif method == 'DELETE':

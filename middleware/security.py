@@ -1,6 +1,7 @@
 import json
 
 secure_paths = [
+    "/",
     "/users",
     "/addresses"
 ]

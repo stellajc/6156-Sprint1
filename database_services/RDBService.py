@@ -78,7 +78,7 @@ class RDBService:
         return res[:-1]
 
     @classmethod
-    def find_by_template(cls, db_schema, table_name, template, limit, offset, field_list=None):
+    def find_by_template(cls, db_schema, table_name, template, limit=None, offset=None, field_list=None):
 
         wc,args = RDBService._get_where_clause_args(template)
 
@@ -86,8 +86,13 @@ class RDBService:
             sql = "select * from " + db_schema + "." + table_name + " " + wc + " " + \
                 "limit " + str(limit) + " " + "offset " + str(offset)
         else:
-            sql = "select " + RDBService.list_str(field_list) + " from " + db_schema + "." + table_name + " " + wc \
-                  + " " + "limit " + str(limit) + " " + "offset " + str(offset)
+            sql = "select " + RDBService.list_str(field_list) + " from " + db_schema + "." + table_name + " " + wc
+            if limit is None and offset is None:
+                pass
+            elif limit is not None and offset is not None:
+                sql += " " + "limit " + str(limit) + " " + "offset " + str(offset)
+            # sql = "select " + RDBService.list_str(field_list) + " from " + db_schema + "." + table_name + " " + wc \
+            #       + " " + "limit " + str(limit) + " " + "offset " + str(offset)
         res, exception_res = RDBService.cursor_exec(sql, args=args, fetch=True, print_stmt=False, exception_on=True)
 
         return res, exception_res
