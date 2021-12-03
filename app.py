@@ -28,7 +28,7 @@ logger.setLevel(logging.INFO)
 
 # pagination data
 OFFSET = 0
-MAXLIMIT = 20
+MAXLIMIT = 2 #20
 
 app = Flask(__name__)
 CORS(app)
@@ -138,7 +138,8 @@ def get_users():
         data, exception_res = UserResource.find_by_template(query_parms, limit, offset)
         links = handle_links(request.url, offset, limit)
         if data is not None:
-            res = {"data": data, "links": links}
+            # res = {"data": data, "links": links}
+            res = data
         else:
             res = data
         rsp = AppHTTPStatus().format_rsp(res, exception_res, method=request.method, path=request.path)
@@ -209,7 +210,7 @@ def register_new_user():
         'nameLast': create_data['family_name'].strip(),
         'nameFirst': create_data['given_name'].strip(),
         'email': create_data['email'].strip(),
-        'googleID': create_data['id'].strip(),
+        'googleID': create_data['sub'].strip(),
         'accessToken': create_data['accessToken'].strip()
     }
     localID, _ = UserResource.find_by_template({'email': create_data['email']}, field_list=['ID'])
