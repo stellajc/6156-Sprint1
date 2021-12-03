@@ -22,18 +22,18 @@ def get_db_info():
             "cursorclass": pymysql.cursors.DictCursor
         }
     else:
-        # db_info = {
-        #     "host": "sprint-hw1.c9u6tpsdswam.us-east-2.rds.amazonaws.com",
-        #     "user": "teamnamenotfound",
-        #     "password": "teamnamenotfound6156",
-        #     "cursorclass": pymysql.cursors.DictCursor
-        # }
         db_info = {
-            "host": "localhost",
-            "user": "dbuser",
-            "password": "dbuserdbuser",
+            "host": "sprint-hw1.c9u6tpsdswam.us-east-2.rds.amazonaws.com",
+            "user": "teamnamenotfound",
+            "password": "teamnamenotfound6156",
             "cursorclass": pymysql.cursors.DictCursor
         }
+        # db_info = {
+        #     "host": "localhost",
+        #     "user": "dbuser",
+        #     "password": "dbuserdbuser",
+        #     "cursorclass": pymysql.cursors.DictCursor
+        # }
 
     return db_info
 
