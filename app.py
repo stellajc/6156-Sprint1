@@ -28,7 +28,7 @@ logger.setLevel(logging.INFO)
 
 # pagination data
 OFFSET = 0
-MAXLIMIT = 2 #20
+MAXLIMIT = 10 #20
 
 app = Flask(__name__)
 CORS(app)
