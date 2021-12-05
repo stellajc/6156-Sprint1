@@ -72,8 +72,11 @@ class NotificationMiddlewareHandler:
             request_data = request.get_json()
         except Exception as e:
             request_data = None
-
-        if request.method == "POST":
+        if request.method == "GET":
+            notification["ret"] = response
+            notification["change"] = "GET"
+            notification["params"] = path
+        elif request.method == "POST":
             notification["change"] = "CREATED"
             notification["new_state"] = request_data
             notification["params"] = path
