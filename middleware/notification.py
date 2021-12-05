@@ -73,20 +73,18 @@ class NotificationMiddlewareHandler:
         except Exception as e:
             request_data = None
         if request.method == "GET":
-            notification["ret"] = response
-            notification["change"] = "GET"
-            notification["params"] = path
-        elif request.method == "POST":
-            notification["change"] = "CREATED"
-            notification["new_state"] = request_data
-            notification["params"] = path
-        elif request.method == "PUT":
-            notification["change"] = "UPDATE"
-            notification["new_state"] = request_data
-            notification["params"] = path
-        elif request.method == "DELETE":
-            notification["change"] = "DELETE"
-            notification["params"] = path
+            notification = response
+        # elif request.method == "POST":
+        #     notification["change"] = "CREATED"
+        #     notification["new_state"] = request_data
+        #     notification["params"] = path
+        # elif request.method == "PUT":
+        #     notification["change"] = "UPDATE"
+        #     notification["new_state"] = request_data
+        #     notification["params"] = path
+        # elif request.method == "DELETE":
+        #     notification["change"] = "DELETE"
+        #     notification["params"] = path
         else:
             notification = None
 
