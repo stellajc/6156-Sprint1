@@ -44,15 +44,15 @@ blueprint = make_google_blueprint(
 app.register_blueprint(blueprint, url_prefix="/login", offline=True)
 
 
-@app.before_request
-def before_request_func():
-    try:
-        result_ok = security.check_security(request, google)
-        if (not result_ok) and request.endpoint != 'google.login':
-            return redirect(url_for('google.login'))
-    except TokenExpiredError:
-        del blueprint.token
-        return redirect(url_for('google.login'))
+# @app.before_request
+# def before_request_func():
+#     try:
+#         result_ok = security.check_security(request, google)
+#         if (not result_ok) and request.endpoint != 'google.login':
+#             return redirect(url_for('google.login'))
+#     except TokenExpiredError:
+#         del blueprint.token
+#         return redirect(url_for('google.login'))
 
 # oauth
 # app.secret_key = "supersekrit"

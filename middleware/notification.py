@@ -73,7 +73,8 @@ class NotificationMiddlewareHandler:
         except Exception as e:
             request_data = None
         if request.method == "GET":
-            notification = response
+            # t = response.get_data().decode("ascii")
+            notification = json.loads((response.get_data()).decode('utf-8'))
         # elif request.method == "POST":
         #     notification["change"] = "CREATED"
         #     notification["new_state"] = request_data
