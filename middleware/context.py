@@ -31,3 +31,9 @@ def get_db_info():
 
     return db_info
 
+def get_context(api_name):
+    if api_name == "SMARTY":
+        auth_id = "55db43b6-6c8d-8af6-c1de-302bf949bc48"
+        auth_token = "8zIBqRgihSDMg4fdjdW2"
+        return {"auth_id":auth_id, "auth_token":auth_token}
+
