@@ -28,12 +28,6 @@ def get_db_info():
             "password": "teamnamenotfound6156",
             "cursorclass": pymysql.cursors.DictCursor
         }
-        # db_info = {
-        #     "host": "localhost",
-        #     "user": "dbuser",
-        #     "password": "dbuserdbuser",
-        #     "cursorclass": pymysql.cursors.DictCursor
-        # }
 
     return db_info
 

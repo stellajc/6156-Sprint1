@@ -198,7 +198,7 @@ def get_user_by_id(userid):
         rsp = AppHTTPStatus().format_rsp(res, exception_res, method=request.method, path=request.path)
         return rsp
 
-@app.route('/user/register', methods=['POST'])
+@app.route('/register', methods=['POST'])
 def register_new_user():
     # only json files allowed in the body
     create_data = json.loads(request.data.decode(encoding='utf-8'))
@@ -358,4 +358,4 @@ def steam_auth():
 
 
 if __name__ == '__main__':
-    app.run()
+    app.run(port=5000,debug=True)
