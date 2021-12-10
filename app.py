@@ -1,5 +1,6 @@
 import time
-from flask import Flask, Response, request, redirect, url_for, session
+from flask import Flask, Response, request, redirect, url_for, session, render_template
+import requests
 from flask_cors import CORS
 import json
 import logging
@@ -33,7 +34,7 @@ MAXLIMIT = 10 #20
 app = Flask(__name__)
 CORS(app)
 app.secret_key = "supersekrit"
-os.environ['steawmpowered_key'] = 'BBC837ECFD8415A58B7575D83BCDA639'
+os.environ['steampowered_key'] = 'BBC837ECFD8415A58B7575D83BCDA639'
 @app.errorhandler(404)
 def not_found(e):
     rsp = Response(response=json.dumps({"ERROR": "404 NOT FOUND"}, default=str, indent=4), status=404,
@@ -304,10 +305,26 @@ def get_user_from_addressid(addressid):
 @app.route('/steampowered/status')
 def steam_status():
     if session.get('steam_userid', None):
-        print("cookie")
-        print(request.cookies.get("steam_userid", None))
-        return "SteamID is: {0}".format(session['steam_userid'])
-        # return
+        # print("cookie")
+        # print(request.cookies.get("steam_userid", None))
+        # print(os.getenv('steampowered_key'))
+        # print(session['steam_userid'])
+        url = "https://api.steampowered.com/IPlayerService/GetRecentlyPlayedGames/v0001/?key=" +str(os.getenv('steampowered_key')) + "&steamid=" + str(76561197960434622) + "&format=json"
+        data = requests.get(url)
+        data = json.loads(data.text)
+        if data['response'].get('games', None) is None:
+            return "SteamID is: %s<br> %s" % (session['steam_userid'], "Haven't played games for a while or the profile is not public")
+        game_list = data['response']['games']
+        game_name_list = [i['name'] for i in game_list]
+        game_id_list = [i['appid'] for i in game_list]
+        game_base_url = "https://store.steampowered.com/app/"
+        game_link_list = [game_base_url + str(i) for i in game_id_list]
+        game_img_logo_list = [i['img_logo_url'] for i in game_list]
+        # return "SteamID is: %s\n %s" % (session['steam_userid'], data)
+        get_img_base_url = "https://media.steampowered.com/steamcommunity/public/images/apps/"
+        game_img_list = [get_img_base_url+str(game_id_list[i])+"/"+game_img_logo_list[i]+'.jpg' for i in range(len(game_link_list))]
+        game_comb_list = [(game_name_list[i], game_link_list[i], game_img_list[i]) for i in range(len(game_name_list))]
+        return render_template('game_list.html', content_list = game_comb_list, user_name=session['steam_userid'])
     else:
         # TODO: two buttons, one for retry, one for redirect to '/'
         steamlogin = SteamSignIn()

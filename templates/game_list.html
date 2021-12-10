@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Recent Games played</title>
+</head>
+<body>
+<h1>Recent Games played</h1>
+<h4>Steam User: {{ user_name }}</h4>
+<table>
+{% for i in content_list %}
+    <tr>
+    <td>
+    <li>
+    <a href={{ i[1] }}>{{i[0]}}</a>
+    </li>
+    </td>
+    <td>
+        <img src={{ i[2]}} alt="image" />
+    </td>
+    </tr>
+{% endfor %}
+</table>
+</body>
+</html>
